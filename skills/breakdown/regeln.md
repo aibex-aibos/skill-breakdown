@@ -1,4 +1,4 @@
-# Zerlege- und Katalogregeln, Fassung 6
+# Zerlege- und Katalogregeln, Fassung 7
 
 Die Regeln, nach denen der Skill `breakdown` einen Beitrag in Einzelaussagen zerlegt, jede Aussage einstuft und auf Wunsch die Meta-Zerlegung darüber bildet. Die Regeln gelten gleich für jeden Beitrag, auch für ein Grunddokument einer Wissensbasis. Eine gespeicherte Zerlegung nennt die Fassung, nach der sie entstand.
 
@@ -34,7 +34,7 @@ Die Regeln, nach denen der Skill `breakdown` einen Beitrag in Einzelaussagen zer
 
 **Z7 — Beispiele im Text.** Ein Codeblock, eine Beispieldatei oder ein Beispieldialog ergibt höchstens eine Aussage, nämlich was das Beispiel zeigt, und nur, wenn der Fließtext das nicht schon sagt. Die Einzelheiten des Beispiels fallen weg und werden nicht als Rahmen geführt; ein Beispiel im Text ist kein Beispielprodukt im Sinn von Z6. Erläuterungen im Fließtext zu einzelnen Zeilen eines Beispiels werden normal zerlegt.
 
-**Z12 — Abschnitte.** Jeder Beitrag wird in Abschnitten gelesen und zerlegt, auch ein kurzer: ein PDF zu 6 Seiten, ein Transkript oder Markdown-Dokument zu etwa 1000 Wörtern, bei Markdown bevorzugt an einer Überschrift. Ein Abschnitt wird fertig zerlegt und geschrieben, bevor der nächste gelesen wird; nie wird der ganze Beitrag erst im Kopf zerlegt und dann auf einmal geschrieben. Nach dem letzten Abschnitt werden Wiederholungen über die Abschnittsgrenzen nach Z3 geprüft und die Kennungen neu vergeben.
+**Z12 — Einheiten und Durchgänge.** Jeder Beitrag wird in kleinen Einheiten zerlegt, auch ein kurzer: ein PDF je Seite; ein Transkript zu etwa 300 Wörtern, geteilt an einer Zeilengrenze; ein Markdown-Dokument je Abschnitt an einer Überschrift, ein Abschnitt über 300 Wörter an der Absatzgrenze vor 300 Wörtern geteilt, ein Abschnitt unter 100 Wörtern mit dem folgenden zusammengelegt, solange zusammen höchstens 300 Wörter entstehen. Zerlegen (Z1 bis Z11) und Einstufen (Katalog) sind getrennte Durchgänge: Erst werden alle Einheiten zerlegt, dann die Aussagen in Gruppen von höchstens 20 eingestuft. Wiederholungen und gleiche Sachverhalte innerhalb einer Einheit werden beim Zerlegen zusammengeführt, über die Einheiten hinweg am Ende an Kandidaten, die das Skript vorschlägt; danach werden die Kennungen neu vergeben. Teilen, Vorschlagen und Prüfen übernimmt das Skript `scripts/breakdown.py`; den Ablauf beschreibt `SKILL.md`.
 
 **Z8 — Tabellen.** Jede Zelle wird wie Fließtext zerlegt. In Gegenüberstellungen zählen Aussagen über das alte Vorgehen ebenso wie Aussagen über das neue.
 
