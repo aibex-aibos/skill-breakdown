@@ -1,0 +1,9 @@
+name: skill-breakdown
+version: 0.1.0
+type: skill
+description: Zerlegt einen Beitrag (Transkript, Markdown, PDF) in Einzelaussagen, stuft sie nach Art, Beleg und Reichweite ein und speichert das Wissensprofil, auf Wunsch mit Meta-Ebenen
+requires:
+  aibos: ">=0.7,<0.8"
+contents:
+  skills: [breakdown]
+license: Apache-2.0
