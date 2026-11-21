@@ -9,7 +9,7 @@ Implementierungsplan: `MSZ-Zerlegung-Beitrag`, Memo 27, freigegeben in Memo 28; 
 | S3 | Skript breakdown.py und Testfälle T1–T8 | ☑ | breakdown.py mit fünf Befehlen; 14 Tests in MSZ tests/breakdown/ grün, T8 zählt die Probe am Playbook nach |
 | S4 | regeln.md aus Spec 01 | ☑ | regeln.md = Spec 01 Fassung 5 ohne Frontmatter; 5 Zeilen angepasst (Titel, Einleitung, drei Verweise auf Specs) |
 | S5 | SKILL.md nach Spec 03 und 05 | ☑ | Ablauf, Ablage, Meta-Zerlegung, zweiter Durchlauf, Meldung, vorläufige Arten, Fehlerfälle, Grenze nach R8 wörtlich |
-| S6 | Skript: Ablauf führen (split, next, submit, status, assemble), Tests T9–T13 | ☐ | |
+| S6 | Skript: Ablauf führen (split, next, submit, status, assemble), Tests T9–T13 | ☑ | breakdown.py mit zehn Befehlen; 26 Tests in MSZ tests/breakdown/ grün (14 bisherige, 12 neue in test_ablauf.py); Festlegungen A91–A97 (Memo 41) |
 | S7 | regeln.md auf Fassung 7 | ☐ | |
 | S8 | SKILL.md als Schleife nach Spec 03 | ☐ | |
 | S9 | Evals vorbereiten (erwartet.md, run.sh) | ☐ | |
