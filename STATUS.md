@@ -11,7 +11,7 @@ Implementierungsplan: `MSZ-Zerlegung-Beitrag`, Memo 27, freigegeben in Memo 28; 
 | S5 | SKILL.md nach Spec 03 und 05 | ☑ | Ablauf, Ablage, Meta-Zerlegung, zweiter Durchlauf, Meldung, vorläufige Arten, Fehlerfälle, Grenze nach R8 wörtlich |
 | S6 | Skript: Ablauf führen (split, next, submit, status, assemble), Tests T9–T13 | ☑ | breakdown.py mit zehn Befehlen; 26 Tests in MSZ tests/breakdown/ grün (14 bisherige, 12 neue in test_ablauf.py); Festlegungen A91–A97 (Memo 41) |
 | S7 | regeln.md auf Fassung 7 | ☑ | Titel Fassung 7, Z12 aus Spec 01 (Schlusssatz verweist auf Skript und SKILL.md statt auf Specs); 6 Zeilen weichen ab, wie bisher nur Verweise (Memo 42) |
-| S8 | SKILL.md als Schleife nach Spec 03 | ☐ | |
+| S8 | SKILL.md als Schleife nach Spec 03 | ☑ | Grundzerlegung als Schleife aus next/submit, assemble, remove; zweiter Durchlauf mit split --zweiter; Schritte 1–11 wie Spec 03; Befehl remove im Skript, 27 Tests grün (Memo 43) |
 | S9 | Evals vorbereiten (erwartet.md, run.sh) | ☐ | |
 | S10 | Stufe 1: Wegwerf-Kandidat, Evals, Kapitel mit 10 Minuten | ☐ | |
 | S11 | README fertig, Paket prüfen | ☐ | |

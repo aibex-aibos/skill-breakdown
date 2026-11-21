@@ -12,7 +12,9 @@ description: >
 
 Der Skill zerlegt einen Beitrag in Einzelaussagen, stuft jede ein und speichert das Ergebnis als Markdown-Datei. Die Regeln und der Katalog stehen in **`regeln.md`** in diesem Ordner; lies sie bei jedem Aufruf vollständig, bevor du zerlegst. Gezählt wird nur mit dem Skript, nie geschätzt.
 
-**Skript:** `python3 <Skill-Ordner>/scripts/breakdown.py <befehl> …`; `<Skill-Ordner>` ist der Ordner dieses Skills („Base directory for this skill"). Immer über `python3` aufrufen. Exit-Code 2 heißt: das Format einer Datei ist verletzt; die Ausgabe nennt Zeile und Grund.
+**Das Skript führt.** Die Grundzerlegung ist keine einzelne große Aufgabe, sondern eine Folge kleiner Teilaufgaben, die das Skript ausgibt und prüft: eine Einheit zerlegen, eine Gruppe von Aussagen einstufen, eine Gruppe von Kandidaten abgleichen. Du erledigst immer **nur die Teilaufgabe, die `next` ausgibt**, schreibst ihr Ergebnis in die genannte Datei und gibst es mit `submit` ab. Zerleg nie im Denken vor, was noch nicht ausgegeben ist, und schreib nie den ganzen Beitrag auf einmal.
+
+**Skript:** `python3 <Skill-Ordner>/scripts/breakdown.py <befehl> …`; `<Skill-Ordner>` ist der Ordner dieses Skills („Base directory for this skill"). Immer über `python3` aufrufen. Exit-Code 2 heißt: das Format einer Datei oder Abgabe ist verletzt; die Ausgabe nennt Zeile und Grund. Exit-Code 3 heißt: eine Teilaufgabe wurde nach drei zurückgewiesenen Abgaben abgebrochen.
 
 **Fragen:** Jede Frage mit Optionen stellst du mit dem Auswahlwerkzeug; in Claude Code lädst du es bei Bedarf mit `ToolSearch` (`select:AskUserQuestion`). Ohne Auswahlwerkzeug stellst du dieselbe Frage als nummerierte Liste, die Empfehlung zuerst.
 
@@ -32,11 +34,11 @@ Ein Grunddokument bekommt immer einen zweiten Durchlauf. Nennt der Auftrag keine
 
 ## Art des Beitrags
 
-| Datei | Art | Fundstelle | Lesen |
+| Datei | Art | Fundstelle | Einheit (teilt das Skript) |
 |---|---|---|---|
-| `.pdf` | PDF | Seite der Datei („S. 12") | mit dem Lesewerkzeug und `pages`, in Abschnitten zu 6 Seiten |
-| `.md` mit Zeilen, die mit `[hh:mm:ss]` beginnen | Transkript | Zeitstempel („00:10:13") | als Text, in Abschnitten zu etwa 1000 Wörtern |
-| andere `.md` | Markdown | Zeilennummer („Z. 42") | als Text mit Zeilennummern, in Abschnitten zu etwa 1000 Wörtern, bevorzugt an einer Überschrift |
+| `.pdf` | PDF | Seite der Datei („S. 12") | eine Seite; du liest sie mit dem Lesewerkzeug und `pages` |
+| `.md` mit Zeilen, die mit `[hh:mm:ss]` beginnen | Transkript | Zeitstempel („00:10:13") | etwa 300 Wörter; `next` gibt den Text aus |
+| andere `.md` | Markdown | Zeilennummer („Z. 42") | ein Abschnitt, höchstens etwa 300 Wörter; `next` gibt den Text mit Zeilennummern aus |
 
 Andere Dateien nimmst du nicht an; nenne die drei Arten.
 
@@ -52,7 +54,7 @@ Andere Dateien nimmst du nicht an; nenne die drei Arten.
 
 ### Form der Zieldatei
 
-Kopf im Memo-Stil, kein Frontmatter; die Feldnamen genau so:
+Die Zieldatei schreibt `breakdown.py assemble`: Kopf im Memo-Stil, kein Frontmatter, dann *Aussagen* und *Rahmen*. Du ergänzt danach nur **Betrifft** (Autor oder Herkunft, bei einem Video die Adresse). Zur Kontrolle die Form:
 
 ```markdown
 # <Name> — Zerlegung
@@ -81,9 +83,8 @@ Kopf im Memo-Stil, kein Frontmatter; die Feldnamen genau so:
 | R01 | 00:00:19 | <kurz, was die Stelle enthält> |
 ```
 
-- *Wissensprofil*, *Vorläufige Arten*, *Unsichere Stellen*, die Kopfzeile **Meta-Ebenen** und den Abschnitt *Vergleich* schreibt das Skript; du lässt *Wissensprofil* leer.
+- *Wissensprofil*, *Vorläufige Arten*, *Unsichere Stellen*, die Kopfzeile **Meta-Ebenen** und den Abschnitt *Vergleich* schreibt das Skript.
 - *Kennzeichen*: `–`, `unsicher: "<Wortlaut des Originals>"`, `vorläufig` oder beide, durch `; ` getrennt.
-- Ein senkrechter Strich im Text wird `\|`; keine Zeilenumbrüche in einer Zelle.
 - *Rahmen* steht immer in der Datei, auch leer.
 
 ## Ablauf der Grundzerlegung
@@ -93,17 +94,19 @@ Kopf im Memo-Stil, kein Frontmatter; die Feldnamen genau so:
    - `fehlt`: weiter mit 3.
    - `aktuell`: nichts neu zerlegen; das Profil aus der Datei melden. Bei „Meta-Zerlegung" weiter mit *Ablauf der Meta-Zerlegung*, sofern die Datei noch keine Meta-Ebenen hat.
    - `fassung <alt>` oder `geändert`: Datei und Grund nennen und fragen, ob ersetzt werden soll (Empfehlung: ersetzen). Ohne Ja anhalten.
-3. **Beginn melden:** Zieldatei, Fassung der Regeln, Art des Beitrags, Zahl der Abschnitte. Keine Rückfrage (siehe *Grenze*).
-4. **Lesen und zerlegen,** Abschnitt für Abschnitt nach `regeln.md` (Z12), **auch bei einem kurzen Beitrag**. Zerleg einen Abschnitt und schreib seine Zeilen sofort in die Arbeitsdatei, bevor du den nächsten liest; zerleg nie den ganzen Beitrag erst im Kopf. Die **Arbeitsdatei** liegt in einem temporären Ordner (in Claude Code im Scratchpad der Session), eine Zeile je Eintrag, Felder durch ` | `:
-   - Aussage, 8 Felder: `A1 | V1 | <Fundstellen> | <Aussage> | <Art> | <Beleg> | <Reichweite> | <Kennzeichen>`
-   - Rahmen, 4 Felder: `R1 | <Fundstelle> | Rahmen | <Inhalt>`
+3. **Teilen:** `breakdown.py split "<beitrag>" "<zieldatei>" --fassung <fassung> --katalog "<Katalog-Erweiterung>"` (ohne Erweiterung `--katalog keine`). Das Skript legt den **Arbeitsordner** `<projekt>/@Breakdown/.arbeit/<Name>/` an und nennt die Zahl der Einheiten. Gibt es ihn schon zum selben Stand, meldet es `Fortsetzen: …`; dann machst du dort weiter. Findet es bei einem PDF keine Seitenzahl, verlangt es `--seiten <n>`: lies dann nur die erste Seite und nimm die Seitenzahl, die das Lesewerkzeug nennt.
+4. **Beginn melden:** Zieldatei, Fassung der Regeln, Art des Beitrags, Zahl der Einheiten. Keine Rückfrage (siehe *Grenze*).
+5. **Schleife,** bis `next` `fertig` ausgibt:
+   1. `breakdown.py next "<arbeitsordner>"` und genau die ausgegebene Teilaufgabe lesen;
+   2. sie nach `regeln.md` erledigen: beim **Zerlegen** nur diese Einheit (Z1 bis Z11, nicht einstufen; Wiederholungen nur innerhalb der Einheit zusammenführen), beim **Einstufen** nur diese Aussagen nach dem Katalog, beim **Abgleichen** nur diese Paare nach Z3;
+   3. das Ergebnis im angegebenen Format in die genannte Abgabedatei schreiben, eine Zeile je Eintrag; ein senkrechter Strich im Text wird `\|`;
+   4. `breakdown.py submit "<arbeitsordner>"` und dessen **Fortschrittszeile unverändert ausgeben**, etwa „Zerlegen 3/10: 9 Aussagen, 1 Rahmen; zusammen 27 Aussagen".
 
-   Ein senkrechter Strich im Text wird `\|`. Kennungen dürfen vorläufig sein; `renumber` vergibt sie neu. Bei einem PDF merkst du dir die Zahl der Seiten (letzte gelesene Seite).
-5. **Abgleich:** Wiederholungen über die Abschnittsgrenzen nach Z3 zusammenführen (weitere Fundstelle statt neuer Aussage), dann `breakdown.py renumber "<arbeitsdatei>"`.
-6. **Datei schreiben:** `breakdown.py hash "<beitrag>"`, dann die Zieldatei nach *Form der Zieldatei*, mit den Zeilen der Arbeitsdatei als Tabellenzeilen (Rahmen-Zeilen ohne das Feld `Rahmen`). Ordner `@Breakdown/` anlegen, falls er fehlt. Erst jetzt entsteht die Zieldatei; bricht der Lauf vorher ab, bleibt nur die Arbeitsdatei.
-7. **Zählen:** `breakdown.py profile "<zieldatei>" "<beitrag>"`, bei einem PDF mit `--seiten <n>`. Gibt es vorläufige Arten, trag in *Vorläufige Arten* je Art die Definition in einem Satz ein.
+   Endet `submit` mit Exit-Code 2, berichtige dieselbe Abgabe nach der Meldung und gib sie erneut ab. Endet es mit Exit-Code 3, halte an (*Fehlerfälle*). Denk nur über die offene Teilaufgabe nach; was danach kommt, gibt das Skript aus.
+6. **Zusammenführen:** `breakdown.py assemble "<arbeitsordner>"` schreibt Kopf, *Aussagen* und *Rahmen* in die Zieldatei und legt `@Breakdown/` an, falls es fehlt. Dann **Betrifft** im Kopf ergänzen.
+7. **Zählen:** `breakdown.py profile "<zieldatei>" "<beitrag>"`, bei einem PDF mit `--seiten <n>` (die Zahl der Einheiten aus Schritt 3). Gibt es vorläufige Arten, trag in *Vorläufige Arten* je Art die Definition in einem Satz ein.
 8. **Zweiter Durchlauf,** falls verlangt (unten).
-9. **Commit,** wenn das Projekt ein Git-Repo ist: nur die Zieldatei, Nachricht „Zerlegung NN: <Name>" (ohne Nummer „Zerlegung: <Name>"). Nicht pushen. Ohne Git-Repo nicht committen und das melden.
+9. **Aufräumen und Commit:** `breakdown.py remove "<arbeitsordner>"`, dann, wenn das Projekt ein Git-Repo ist, nur die Zieldatei committen, Nachricht „Zerlegung NN: <Name>" (ohne Nummer „Zerlegung: <Name>"). Nicht pushen. Ohne Git-Repo nicht committen und das melden.
 10. **Meldung** (unten).
 11. **Vorläufige Arten** entscheiden lassen (unten).
 
@@ -119,17 +122,16 @@ Kopf im Memo-Stil, kein Frontmatter; die Feldnamen genau so:
 
 ## Zweiter Durchlauf
 
-Starte einen Subagenten. Sein Auftrag nennt nur: den Pfad von `regeln.md`, den Pfad des Beitrags, die Arten der Katalog-Erweiterung, die Abschnittsgröße, das Format der Arbeitsdatei (Schritt 4) und eine **eigene** Ausgabedatei im temporären Ordner. Er nennt weder die Zieldatei noch deine Arbeitsdatei. Danach:
+Starte einen Subagenten. Sein Auftrag nennt nur: den Pfad von `regeln.md`, den Pfad des Beitrags, die Arten der Katalog-Erweiterung, den Aufruf des Skripts mit dem Befehl `split … --zweiter` und die Schritte 3 und 5 dieses Ablaufs, zum Schluss `breakdown.py assemble "<sein arbeitsordner>"`. Er nennt weder die Zieldatei noch deinen Arbeitsordner. `assemble` schreibt beim zweiten Durchlauf die Datei `durchlauf.txt` in seinen Arbeitsordner. Danach:
 
-1. `breakdown.py renumber "<ausgabe des subagenten>"`;
-2. `breakdown.py compare "<zieldatei>" "<ausgabe des subagenten>"` schreibt *Vergleich* und setzt **Durchläufe** auf 2;
-3. die Ausgabedatei des Subagenten löschen.
+1. `breakdown.py compare "<zieldatei>" "<arbeitsordner des subagenten>/durchlauf.txt"` schreibt *Vergleich* und setzt **Durchläufe** auf 2;
+2. `breakdown.py remove "<arbeitsordner des subagenten>"`.
 
 Kennt der Host keine Subagenten, entfällt der zweite Durchlauf; sag das in der Meldung.
 
 ## Meldung am Ende
 
-Pfad der Datei; Zahl der Aussagen, Sachverhalte und Rahmen-Zeilen; die drei häufigsten Arten mit Anteil; die vier Maße; Zahl der unsicheren Stellen; vorläufige Arten mit Name und Zahl der Aussagen; nach einer Meta-Zerlegung Zahl der Ebenen und Grund des Endes; nach einem zweiten Durchlauf das Urteil; ob committet wurde. Alle Zahlen aus der Ausgabe des Skripts.
+Pfad der Datei; Zahl der Aussagen, Sachverhalte und Rahmen-Zeilen; Zahl der Einheiten und der zurückgewiesenen Abgaben (aus `breakdown.py status` vor dem Aufräumen); die drei häufigsten Arten mit Anteil; die vier Maße; Zahl der unsicheren Stellen; vorläufige Arten mit Name und Zahl der Aussagen; nach einer Meta-Zerlegung Zahl der Ebenen und Grund des Endes; nach einem zweiten Durchlauf das Urteil; ob committet wurde. Alle Zahlen aus der Ausgabe des Skripts.
 
 ## Vorläufige Arten
 
@@ -147,11 +149,12 @@ Danach `breakdown.py profile …` erneut und die Zieldatei erneut committen.
 | Beitrag fehlt oder ist keine angenommene Art | melden, nichts schreiben |
 | Beitrag in keinem Projekt | nach dem Zielprojekt fragen |
 | Projekt ohne Git-Repo | Datei schreiben, nicht committen, das melden |
-| Abbruch mitten in der Zerlegung | die Arbeitsdatei bleibt im temporären Ordner; keine halbe Zieldatei |
-| Skript endet mit Exit-Code 1 oder 2 | anhalten, die Ausgabe melden, nichts committen |
+| Abbruch mitten in der Zerlegung | der Arbeitsordner bleibt; ein neuer Auftrag zum selben Beitrag setzt mit `split` an der offenen Teilaufgabe fort; keine halbe Zieldatei |
+| `submit` endet mit Exit-Code 2 | dieselbe Abgabe berichtigen und erneut abgeben |
+| Skript endet mit Exit-Code 1 oder 3 | anhalten, die Ausgabe melden, den Arbeitsordner stehen lassen, nichts committen |
 
 ## Grenzen
 
-- Schreib nur in `@Breakdown/` des Projekts des Beitrags, in den temporären Ordner und, nach einer Antwort des Users, in `@Data/skill-breakdown/katalog.md` an der Vault-Root; nie in dieses Paket.
+- Schreib nur in `@Breakdown/` des Projekts des Beitrags (Zieldatei und Arbeitsordner) und, nach einer Antwort des Users, in `@Data/skill-breakdown/katalog.md` an der Vault-Root; nie in dieses Paket.
 - Push nicht. Ruf `aibos` nicht auf. Lies keine Webseiten.
 - Vergleiche nicht mit einer Wissensbasis und urteile nicht über die Qualität eines Beitrags; die Maße stehen für sich.

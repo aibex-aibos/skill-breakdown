@@ -7,6 +7,7 @@ Befehle (Spec 04 im Konzeptprojekt MSZ-Zerlegung-Beitrag):
   submit   <arbeitsordner>
   status   <arbeitsordner>
   assemble <arbeitsordner> [<ausgabe>]
+  remove   <arbeitsordner>
   hash     <beitrag>
   check    <zerlegung> <beitrag> <fassung>
   renumber <arbeitsdatei>
@@ -23,6 +24,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 from collections import Counter, OrderedDict
 from decimal import Decimal, ROUND_HALF_UP
@@ -1162,8 +1164,21 @@ def cmd_assemble(args):
     print("Aussagen %d, Sachverhalte %d, Rahmen-Zeilen %d; geschrieben: %s" % (na, nv, nr_, ziel))
 
 
+def cmd_remove(args):
+    if len(args) != 1:
+        raise Fehler("remove <arbeitsordner>")
+    ordner = os.path.abspath(args[0])
+    if os.path.basename(os.path.dirname(ordner)) != ".arbeit" or not os.path.isfile(os.path.join(ordner, "zustand.json")):
+        raise Fehler("%s ist kein Arbeitsordner von breakdown (.arbeit/<Name>/ mit zustand.json)" % ordner)
+    shutil.rmtree(ordner)
+    oben = os.path.dirname(ordner)
+    if not os.listdir(oben):
+        os.rmdir(oben)
+    print("entfernt: %s" % ordner)
+
+
 BEFEHLE = {"split": cmd_split, "next": cmd_next, "submit": cmd_submit, "status": cmd_status,
-           "assemble": cmd_assemble, "hash": cmd_hash, "check": cmd_check, "renumber": cmd_renumber,
+           "assemble": cmd_assemble, "remove": cmd_remove, "hash": cmd_hash, "check": cmd_check, "renumber": cmd_renumber,
            "profile": cmd_profile, "compare": cmd_compare}
 
 
