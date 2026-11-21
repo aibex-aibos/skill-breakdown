@@ -35,8 +35,8 @@ Ein Grunddokument bekommt immer einen zweiten Durchlauf. Nennt der Auftrag keine
 | Datei | Art | Fundstelle | Lesen |
 |---|---|---|---|
 | `.pdf` | PDF | Seite der Datei („S. 12") | mit dem Lesewerkzeug und `pages`, in Abschnitten zu 6 Seiten |
-| `.md` mit Zeilen, die mit `[hh:mm:ss]` beginnen | Transkript | Zeitstempel („00:10:13") | als Text; ab etwa 8000 Wörtern in Abschnitten dieser Größe |
-| andere `.md` | Markdown | Zeilennummer („Z. 42") | als Text mit Zeilennummern; ab etwa 8000 Wörtern in Abschnitten |
+| `.md` mit Zeilen, die mit `[hh:mm:ss]` beginnen | Transkript | Zeitstempel („00:10:13") | als Text, in Abschnitten zu etwa 1000 Wörtern |
+| andere `.md` | Markdown | Zeilennummer („Z. 42") | als Text mit Zeilennummern, in Abschnitten zu etwa 1000 Wörtern, bevorzugt an einer Überschrift |
 
 Andere Dateien nimmst du nicht an; nenne die drei Arten.
 
@@ -48,7 +48,7 @@ Andere Dateien nimmst du nicht an; nenne die drei Arten.
 | Vault-Root | vom Projekt aufwärts der erste Ordner mit `.aibos/workspace.yaml`, sonst der erste mit `aibos:` in `.aibos/config.yaml` |
 | Zieldatei | `<projekt>/@Breakdown/NN <Name> — Zerlegung.md` mit Nummer und Name des Beitrags; ohne Nummer `<Name> — Zerlegung.md`, `<Name>` = Dateiname ohne Endung |
 | Fassung der Regeln | die Zahl im Titel von `regeln.md` |
-| Katalog-Erweiterung | die Namen aus `<vault-root>/@Data/skill-breakdown/katalog.md`, durch Komma getrennt; gibt es die Datei nicht, „keine" |
+| Katalog-Erweiterung | die Namen aus `<vault-root>/@Data/skill-breakdown/katalog.md`, durch Komma getrennt; gibt es die Datei nicht oder lässt der Host das Lesen nicht zu, „keine" (das sagt die Meldung) |
 
 ### Form der Zieldatei
 
@@ -94,7 +94,7 @@ Kopf im Memo-Stil, kein Frontmatter; die Feldnamen genau so:
    - `aktuell`: nichts neu zerlegen; das Profil aus der Datei melden. Bei „Meta-Zerlegung" weiter mit *Ablauf der Meta-Zerlegung*, sofern die Datei noch keine Meta-Ebenen hat.
    - `fassung <alt>` oder `geändert`: Datei und Grund nennen und fragen, ob ersetzt werden soll (Empfehlung: ersetzen). Ohne Ja anhalten.
 3. **Beginn melden:** Zieldatei, Fassung der Regeln, Art des Beitrags, Zahl der Abschnitte. Keine Rückfrage (siehe *Grenze*).
-4. **Lesen und zerlegen,** Abschnitt für Abschnitt nach `regeln.md`. Schreib nach jedem Abschnitt die Zeilen in eine **Arbeitsdatei** in einem temporären Ordner (in Claude Code im Scratchpad der Session), eine Zeile je Eintrag, Felder durch ` | `:
+4. **Lesen und zerlegen,** Abschnitt für Abschnitt nach `regeln.md` (Z12), **auch bei einem kurzen Beitrag**. Zerleg einen Abschnitt und schreib seine Zeilen sofort in die Arbeitsdatei, bevor du den nächsten liest; zerleg nie den ganzen Beitrag erst im Kopf. Die **Arbeitsdatei** liegt in einem temporären Ordner (in Claude Code im Scratchpad der Session), eine Zeile je Eintrag, Felder durch ` | `:
    - Aussage, 8 Felder: `A1 | V1 | <Fundstellen> | <Aussage> | <Art> | <Beleg> | <Reichweite> | <Kennzeichen>`
    - Rahmen, 4 Felder: `R1 | <Fundstelle> | Rahmen | <Inhalt>`
 

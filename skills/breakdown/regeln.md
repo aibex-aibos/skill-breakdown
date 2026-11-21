@@ -1,4 +1,4 @@
-# Zerlege- und Katalogregeln, Fassung 5
+# Zerlege- und Katalogregeln, Fassung 6
 
 Die Regeln, nach denen der Skill `breakdown` einen Beitrag in Einzelaussagen zerlegt, jede Aussage einstuft und auf Wunsch die Meta-Zerlegung darüber bildet. Die Regeln gelten gleich für jeden Beitrag, auch für ein Grunddokument einer Wissensbasis. Eine gespeicherte Zerlegung nennt die Fassung, nach der sie entstand.
 
@@ -34,7 +34,7 @@ Die Regeln, nach denen der Skill `breakdown` einen Beitrag in Einzelaussagen zer
 
 **Z7 — Beispiele im Text.** Ein Codeblock, eine Beispieldatei oder ein Beispieldialog ergibt höchstens eine Aussage, nämlich was das Beispiel zeigt, und nur, wenn der Fließtext das nicht schon sagt. Die Einzelheiten des Beispiels fallen weg und werden nicht als Rahmen geführt; ein Beispiel im Text ist kein Beispielprodukt im Sinn von Z6. Erläuterungen im Fließtext zu einzelnen Zeilen eines Beispiels werden normal zerlegt.
 
-**Z12 — Lange Beiträge.** Ein PDF wird in Abschnitten zu 6 Seiten gelesen und zerlegt; ein Transkript oder Markdown-Dokument ab etwa 8000 Wörtern in Abschnitten dieser Größe. Nach jedem Abschnitt wird das Ergebnis gesichert. Nach dem letzten Abschnitt werden Wiederholungen über die Abschnittsgrenzen nach Z3 geprüft und die Kennungen neu vergeben.
+**Z12 — Abschnitte.** Jeder Beitrag wird in Abschnitten gelesen und zerlegt, auch ein kurzer: ein PDF zu 6 Seiten, ein Transkript oder Markdown-Dokument zu etwa 1000 Wörtern, bei Markdown bevorzugt an einer Überschrift. Ein Abschnitt wird fertig zerlegt und geschrieben, bevor der nächste gelesen wird; nie wird der ganze Beitrag erst im Kopf zerlegt und dann auf einmal geschrieben. Nach dem letzten Abschnitt werden Wiederholungen über die Abschnittsgrenzen nach Z3 geprüft und die Kennungen neu vergeben.
 
 **Z8 — Tabellen.** Jede Zelle wird wie Fließtext zerlegt. In Gegenüberstellungen zählen Aussagen über das alte Vorgehen ebenso wie Aussagen über das neue.
 
