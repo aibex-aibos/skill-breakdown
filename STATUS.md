@@ -8,7 +8,7 @@ Implementierungsplan: `MSZ-Zerlegung-Beitrag`, Memo 27; freigegeben in Memo 28.
 | S2 | Holen mit Wegwerf-Kandidat prüfen | ☑ | v0.1.0-rc0 im Klon geholt: Skill breakdown 0.1.0 registriert und ausgerollt; Wegwerf-Projekt im Papierkorb |
 | S3 | Skript breakdown.py und Testfälle T1–T8 | ☑ | breakdown.py mit fünf Befehlen; 14 Tests in MSZ tests/breakdown/ grün, T8 zählt die Probe am Playbook nach |
 | S4 | regeln.md aus Spec 01 | ☑ | regeln.md = Spec 01 Fassung 5 ohne Frontmatter; 5 Zeilen angepasst (Titel, Einleitung, drei Verweise auf Specs) |
-| S5 | SKILL.md nach Spec 03 und 05 | ☐ | |
+| S5 | SKILL.md nach Spec 03 und 05 | ☑ | Ablauf, Ablage, Meta-Zerlegung, zweiter Durchlauf, Meldung, vorläufige Arten, Fehlerfälle, Grenze nach R8 wörtlich |
 | S6 | Rauchprobe im Testprojekt | ☐ | |
 | S7 | README fertig, Paket prüfen | ☐ | |
 | S8 | Release-Kandidat v0.1.0-rc1 | ☐ | |
