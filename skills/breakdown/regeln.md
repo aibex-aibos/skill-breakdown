@@ -119,7 +119,7 @@ Dateiformat und Ablageort einer gespeicherten Zerlegung stehen in `SKILL.md`.
 
 ## Vergleich zweier Durchläufe
 
-Läuft ein zweiter, unabhängiger Durchlauf, werden die Aussagen beider Durchläufe über ihre erste Fundstelle einander zugeordnet. Berichtet werden: die Zahl der Aussagen und Sachverhalte je Durchlauf, der Anteil der zugeordneten Aussagen mit derselben Art, demselben Beleg und derselben Reichweite, und die größte Abweichung der Anteile je Art.
+Läuft ein zweiter, unabhängiger Durchlauf, werden die Aussagen beider Durchläufe über ihre erste Fundstelle einander zugeordnet. Tragen auf einer Seite mehrere Aussagen dieselbe erste Fundstelle (etwa „S. 12“ bei einem PDF), werden sie über den Text zugeordnet: nach dem Anteil gleicher Wörter, das beste Paar zuerst, nur ab einem Anteil von 0,3. Berichtet werden: die Zahl der Aussagen und Sachverhalte je Durchlauf, der Anteil der zugeordneten Aussagen mit derselben Art, demselben Beleg und derselben Reichweite, und die größte Abweichung der Anteile je Art.
 
 Eine Zerlegung gilt als **stabil**, wenn die zugeordneten Aussagen zu mindestens 90 % dieselbe Art tragen und die Anteile je Art um höchstens 10 Prozentpunkte abweichen. Die Zahl der Aussagen wird genannt, ist aber kein Maßstab: Sie schwankte in den Proben um rund 10 %.
 

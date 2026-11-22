@@ -493,6 +493,53 @@ def meta_zaehlen(text, z):
     return "\n".join(zeilen)
 
 
+SCHWELLE_TEXT = Decimal("0.3")
+
+
+def erste_fundstelle(c):
+    return c[2].split(",")[0].strip()
+
+
+def textwoerter(text):
+    return {w for w in re.findall(r"[^\W\d_]+", text.lower()) if len(w) >= 4}
+
+
+def zuordnen(eins, zwei):
+    """Paare (Aussage 1, Aussage 2) nach Spec 01, *Vergleich zweier Durchläufe* (Memo 52, F24):
+    gleiche erste Fundstelle; ist sie auf einer Seite nicht eindeutig, über den Anteil gleicher
+    Wörter, das beste Paar zuerst, mindestens SCHWELLE_TEXT."""
+    g1, g2 = OrderedDict(), OrderedDict()
+    for c in eins:
+        g1.setdefault(erste_fundstelle(c), []).append(c)
+    for c in zwei:
+        g2.setdefault(erste_fundstelle(c), []).append(c)
+    paare = []
+    for k, l1 in g1.items():
+        l2 = g2.get(k, [])
+        if not l2:
+            continue
+        if len(l1) == 1 and len(l2) == 1:
+            paare.append((l1[0], l2[0]))
+            continue
+        kand = []
+        for i, a in enumerate(l1):
+            wa = textwoerter(a[3])
+            for j, b in enumerate(l2):
+                wb = textwoerter(b[3])
+                if wa and wb:
+                    wert = Decimal(len(wa & wb)) / Decimal(len(wa | wb))
+                    if wert >= SCHWELLE_TEXT:
+                        kand.append((wert, i, j))
+        kand.sort(key=lambda x: (-x[0], x[1], x[2]))
+        frei1, frei2 = set(range(len(l1))), set(range(len(l2)))
+        for _, i, j in kand:
+            if i in frei1 and j in frei2:
+                paare.append((l1[i], l2[j]))
+                frei1.discard(i)
+                frei2.discard(j)
+    return paare
+
+
 def cmd_compare(args):
     if len(args) != 2:
         raise Fehler("compare <zerlegung> <zweiter-durchlauf>")
@@ -510,19 +557,11 @@ def cmd_compare(args):
         elif not (len(f) == 4 and f[2] == "Rahmen"):
             raise FormatFehler("%s, Zeile %d: %d Felder" % (zweiter, nr, len(f)))
 
-    def erste(c):
-        return c[2].split(",")[0].strip()
-
-    def eindeutig(liste):
-        z_ = Counter(erste(c) for c in liste)
-        return {erste(c): c for c in liste if z_[erste(c)] == 1}
-
-    e1, e2 = eindeutig(eins), eindeutig(zwei)
-    gemeinsam = [k for k in e1 if k in e2]
-    m = len(gemeinsam)
-    art = sum(1 for k in gemeinsam if e1[k][4] == e2[k][4])
-    beleg = sum(1 for k in gemeinsam if e1[k][5] == e2[k][5])
-    reich = sum(1 for k in gemeinsam if e1[k][6] == e2[k][6])
+    paare = zuordnen(eins, zwei)
+    m = len(paare)
+    art = sum(1 for a, b in paare if a[4] == b[4])
+    beleg = sum(1 for a, b in paare if a[5] == b[5])
+    reich = sum(1 for a, b in paare if a[6] == b[6])
     a1, a2 = Counter(c[4] for c in eins), Counter(c[4] for c in zwei)
     abw = Decimal(0)
     for a in set(a1) | set(a2):
@@ -535,14 +574,14 @@ def cmd_compare(args):
     teile = [tabelle(["Merkmal", "Durchlauf 1", "Durchlauf 2"],
                      [["Aussagen", len(eins), len(zwei)], ["Sachverhalte", v1, v2]])]
     teile.append(tabelle(["Übereinstimmung", "Wert"], [
-        ["zugeordnete Aussagen (gleiche erste Fundstelle)", m],
+        ["zugeordnete Aussagen (gleiche erste Fundstelle, bei mehreren über den Text)", m],
         ["gleiche Art", "%d (%s)" % (art, prozent(art, m))],
         ["gleicher Beleg", "%d (%s)" % (beleg, prozent(beleg, m))],
         ["gleiche Reichweite", "%d (%s)" % (reich, prozent(reich, m))],
         ["größte Abweichung der Anteile je Art", zahl(abw) + " Prozentpunkte"],
     ]))
     teile.append("**Urteil:** %s" % urteil)
-    abweichend = [[e1[k][0], k, e1[k][4], e2[k][4]] for k in gemeinsam if e1[k][4] != e2[k][4]]
+    abweichend = [[a[0], erste_fundstelle(a), a[4], b[4]] for a, b in paare if a[4] != b[4]]
     if abweichend:
         teile.append("Stellen mit abweichender Art:\n\n" +
                      tabelle(["Aussage", "Fundstelle", "Durchlauf 1", "Durchlauf 2"], abweichend))
