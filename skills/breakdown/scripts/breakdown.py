@@ -626,6 +626,13 @@ def pdf_seiten(pfad):
             daten = f.read()
     except OSError as e:
         raise Fehler("kann %s nicht lesen: %s" % (pfad, e.strerror))
+    # Seitenbaum: der größte /Count eines /Type /Pages (Memo 55, F26); Seitenobjekte ohne Verweis zählen nicht
+    counts = []
+    for m in re.finditer(rb"/Type\s*/Pages(?![A-Za-z])", daten):
+        fenster = daten[max(0, m.start() - 400):m.end() + 400]
+        counts += [int(c) for c in re.findall(rb"/Count\s+(\d+)", fenster)]
+    if counts:
+        return max(counts)
     return len(re.findall(rb"/Type\s*/Page(?![A-Za-z])", daten))
 
 
@@ -906,7 +913,7 @@ def cmd_next(args):
         aus += ["%s | %s | %s" % (x["id"], x["fundstellen"], x["text"]) for x in z["aussagen"] if x["einheit"] == k]
         aus += ["", "Frühere Aussagen:"]
         aus += ["%s | %s" % (x["id"], x["text"]) for x in z["aussagen"] if x["einheit"] < k]
-        aus += ["", "Abgabe: eine Zeile je gefundenem Paar in %s" % datei,
+        aus += ["", "Abgabe: eine Zeile je gefundenem Paar, je Aussage dieser Einheit höchstens eine, in %s" % datei,
                 "  <Kennung dieser Einheit> | <frühere Kennung> | gleich|sachverhalt",
                 "  nichts gefunden: eine Zeile keine"]
     aus += ["", "Dann: breakdown.py submit \"%s\"" % ordner]
@@ -1011,7 +1018,7 @@ def abgabe_abgleichen(z, idx, text):
         raise FormatFehler("Abgabe ist leer; ohne Fund eine Zeile keine schreiben")
     if len(zeilen) == 1 and zeilen[0][1].strip() == "keine":
         return []
-    paare, gleich_schon = [], set()
+    paare, verbunden = [], set()
     for nr, l in zeilen:
         f = felder(l)
         if len(f) != 3:
@@ -1023,12 +1030,9 @@ def abgabe_abgleichen(z, idx, text):
             raise FormatFehler("Zeile %d: frühere Kennung %r gehört zu keiner früheren Einheit" % (nr, a_))
         if wert not in ("gleich", "sachverhalt"):
             raise FormatFehler("Zeile %d: Entscheidung %r; erwartet gleich oder sachverhalt" % (nr, wert))
-        if [pos[a_], pos[n_], wert] in paare:
-            raise FormatFehler("Zeile %d: Paar doppelt" % nr)
-        if wert == "gleich":
-            if n_ in gleich_schon:
-                raise FormatFehler("Zeile %d: %s ist schon als gleich zugeordnet" % (nr, n_))
-            gleich_schon.add(n_)
+        if n_ in verbunden:
+            raise FormatFehler("Zeile %d: %s steht schon in einer Zeile; je Aussage höchstens eine Verbindung" % (nr, n_))
+        verbunden.add(n_)
         paare.append([pos[a_], pos[n_], wert])
     return paare
 
@@ -1105,7 +1109,10 @@ def cmd_status(args):
             erledigt = 0
         print("%s: %s/%s" % (NAMEN[p], erledigt, "?" if n is None else n))
     print("Aussagen: %d, Rahmen: %d, zurückgewiesene Abgaben: %d" % (len(z["aussagen"]), len(z["rahmen"]), z["zurueckgewiesen"]))
-    print("offen: %s" % ("assemble" if phase == "fertig" else aufgabe_titel(z, phase, idx)))
+    if phase == "fertig":
+        print("offen: %s" % ("nichts (zusammengeführt)" if z.get("zusammengefuehrt") else "assemble"))
+    else:
+        print("offen: %s" % aufgabe_titel(z, phase, idx))
 
 
 def zusammenfuehren(z):
@@ -1119,12 +1126,15 @@ def zusammenfuehren(z):
             s = eltern[s]
         return s
 
+    erste_einheit = {x["s"]: x["einheit"] for x in a}  # je Wurzel die früheste Einheit ihrer Mitglieder
     weg = {}
     for i, j, wert in z["entscheidungen"]:
         if wert in ("gleich", "sachverhalt"):
             r1, r2 = wurzel(a[i]["s"]), wurzel(a[j]["s"])
-            if r1 != r2:
+            # nur beitreten, solange der Sachverhalt der neuen Aussage noch keinem früheren angehört (Memo 55, F27)
+            if r1 != r2 and erste_einheit[r2] >= a[j]["einheit"]:
                 eltern[r2] = r1
+                erste_einheit[r1] = min(erste_einheit[r1], erste_einheit[r2])
         if wert == "gleich":
             weg[j] = i
     fund = {k: [f.strip() for f in x["fundstellen"].split(",")] for k, x in enumerate(a)}
@@ -1190,6 +1200,8 @@ def cmd_assemble(args):
         d = os.path.dirname(os.path.abspath(ziel))
         os.makedirs(d, exist_ok=True)
         schreiben(ziel, text)
+    z["zusammengefuehrt"] = True
+    zustand_schreiben(ordner, z)
     print("Aussagen %d, Sachverhalte %d, Rahmen-Zeilen %d; geschrieben: %s" % (na, nv, nr_, ziel))
 
 
