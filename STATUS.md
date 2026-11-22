@@ -14,5 +14,5 @@ Implementierungsplan: `MSZ-Zerlegung-Beitrag`, Memo 27, freigegeben in Memo 28; 
 | S8 | SKILL.md als Schleife nach Spec 03 | ☑ | Grundzerlegung als Schleife aus next/submit, assemble, remove; zweiter Durchlauf mit split --zweiter; Schritte 1–11 wie Spec 03; Befehl remove im Skript, 27 Tests grün (Memo 43) |
 | S9 | Evals vorbereiten (erwartet.md, run.sh) | ☑ | drei erwartet.md (2, 8, 7 Kernaussagen), von iHux bestätigt; auswerten.py, run.sh (Memos 44, 45) |
 | S10 | Stufe 1: Wegwerf-Kandidat, Evals, Kapitel mit 10 Minuten | ☑ | Kapitel in 202 s mit Abgleich; E-PDF und E-Markdown bestanden; E-Transkript 83,3 % (B12), von iHux so angenommen (Memos 48, 49) |
-| S11 | README fertig, Paket prüfen | ☐ | |
+| S11 | README fertig, Paket prüfen | ☑ | README nach Spec 05; anja-pruefen ohne Befund, Grenze nach R8 als Ausnahme laut Paket-Spec (Memo 50) |
 | S12 | Release-Kandidat v0.1.0-rc1 | ☐ | |
