@@ -12,7 +12,7 @@ Implementierungsplan: `MSZ-Zerlegung-Beitrag`, Memo 27, freigegeben in Memo 28; 
 | S6 | Skript: Ablauf führen (split, next, submit, status, assemble), Tests T9–T13 | ☑ | breakdown.py mit zehn Befehlen; 26 Tests in MSZ tests/breakdown/ grün (14 bisherige, 12 neue in test_ablauf.py); Festlegungen A91–A97 (Memo 41) |
 | S7 | regeln.md auf Fassung 7 | ☑ | Titel Fassung 7, Z12 aus Spec 01 (Schlusssatz verweist auf Skript und SKILL.md statt auf Specs); 6 Zeilen weichen ab, wie bisher nur Verweise (Memo 42) |
 | S8 | SKILL.md als Schleife nach Spec 03 | ☑ | Grundzerlegung als Schleife aus next/submit, assemble, remove; zweiter Durchlauf mit split --zweiter; Schritte 1–11 wie Spec 03; Befehl remove im Skript, 27 Tests grün (Memo 43) |
-| S9 | Evals vorbereiten (erwartet.md, run.sh) | ◐ | drei erwartet.md (2, 8, 7 Kernaussagen), auswerten.py, run.sh mit --plan geprüft; Bestätigung der Kernaussagen durch iHux offen (Memo 44) |
-| S10 | Stufe 1: Wegwerf-Kandidat, Evals, Kapitel mit 10 Minuten | ☐ | |
+| S9 | Evals vorbereiten (erwartet.md, run.sh) | ☑ | drei erwartet.md (2, 8, 7 Kernaussagen), von iHux bestätigt; auswerten.py, run.sh (Memos 44, 45) |
+| S10 | Stufe 1: Wegwerf-Kandidat, Evals, Kapitel mit 10 Minuten | ◐ | Kapitel in 203 s mit Fortschrittszeilen fertig; Evals formal nicht bestanden; Befunde B8–B11, FG7 offen (Memo 45) |
 | S11 | README fertig, Paket prüfen | ☐ | |
 | S12 | Release-Kandidat v0.1.0-rc1 | ☐ | |
