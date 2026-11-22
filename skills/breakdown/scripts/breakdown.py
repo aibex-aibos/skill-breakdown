@@ -557,20 +557,7 @@ def cmd_compare(args):
 EINHEIT_WOERTER = 300
 KLEIN_WOERTER = 100
 GRUPPE_EINSTUFEN = 20
-GRUPPE_ABGLEICH = 10
-SCHWELLE_KANDIDAT = Decimal("0.5")
 MAX_FEHLVERSUCHE = 3
-FUNKTIONSWOERTER = set("""
-aber alle allem allen aller alles also auch auf aus bei beim beide beiden bereits bis bisher dabei dadurch
-dafür dagegen daher damit danach dann daran darauf darin darum darüber dass dein deine dem den denen denn der
-deren des dessen dich dies diese diesem diesen dieser dieses doch dort durch eben eine einem einen einer eines
-einige einmal etwa etwas euch euer für gegen gibt habe haben hat hatte hätte hier hinter ihm ihn ihnen ihr ihre
-ihrem ihren ihrer immer indem jede jedem jeden jeder jedes jedoch jene kann kein keine keinem keinen keiner können
-könnte machen macht mehr mein meine mich mit muss müssen nach nicht nichts noch nur oder ohne schon sehr sein
-seine seinem seinen seiner seit selbst sich sie sind soll sollen sollte sondern sowie über ohne unter viel viele
-vom von vor wann warum was weil welche welchem welchen welcher welches wenn werden wer wie wieder will wird wo
-wurde wurden würde zum zur zwar zwischen this that with from have what when they them their there about into
-""".split())
 DURCHGAENGE = ["zerlegen", "einstufen", "abgleichen"]
 NAMEN = {"zerlegen": "Zerlegen", "einstufen": "Einstufen", "abgleichen": "Abgleichen"}
 
@@ -725,7 +712,7 @@ def aufgaben(z, phase):
     if phase == "einstufen":
         return len(gruppen(z["aussagen"], GRUPPE_EINSTUFEN))
     if phase == "abgleichen":
-        return len(gruppen(z["kandidaten"], GRUPPE_ABGLEICH))
+        return len(z["kandidaten"])
     return 0
 
 
@@ -736,7 +723,7 @@ def offene_aufgabe(z):
         phase = DURCHGAENGE[DURCHGAENGE.index(phase) + 1] if phase != "abgleichen" else "fertig"
         idx = 0
         if phase == "abgleichen":
-            z["kandidaten"] = kandidaten(z)
+            z["kandidaten"] = abgleich_einheiten(z)
     z["phase"], z["index"] = phase, idx
     return phase, idx
 
@@ -746,21 +733,15 @@ def abgabe_datei(ordner, phase, idx):
     return os.path.join(ordner, "abgaben", "%s-%s%02d.txt" % (phase, kurz, idx + 1))
 
 
-def inhaltswoerter(text):
-    return {w for w in re.findall(r"[^\W\d_]+", text.lower()) if len(w) >= 4 and w not in FUNKTIONSWOERTER}
-
-
-def kandidaten(z):
-    a = z["aussagen"]
-    w = [inhaltswoerter(x["text"]) for x in a]
-    paare = []
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
-            if a[i]["einheit"] == a[j]["einheit"] or not w[i] or not w[j]:
-                continue
-            if Decimal(len(w[i] & w[j])) / Decimal(len(w[i] | w[j])) >= SCHWELLE_KANDIDAT:
-                paare.append([i, j])
-    return paare
+def abgleich_einheiten(z):
+    """Einheiten ab der zweiten, die Aussagen haben und vor denen es Aussagen gibt."""
+    aus, frueher = [], False
+    for e in z["einheiten"]:
+        eigene = any(x["einheit"] == e["nr"] for x in z["aussagen"])
+        if eigene and frueher:
+            aus.append(e["nr"])
+        frueher = frueher or eigene
+    return aus
 
 
 def cmd_split(args):
@@ -832,7 +813,7 @@ def aufgabe_titel(z, phase, idx):
         return "Zerlegen · Einheit %d von %d (%s)" % (idx + 1, n, z["einheiten"][idx]["bereich"])
     if phase == "einstufen":
         return "Einstufen · Gruppe %d von %d" % (idx + 1, n)
-    return "Abgleichen · Gruppe %d von %d" % (idx + 1, n)
+    return "Abgleichen · Einheit %d (%d von %d)" % (z["kandidaten"][idx], idx + 1, n)
 
 
 def cmd_next(args):
@@ -878,15 +859,17 @@ def cmd_next(args):
                 "  Beleg: %s" % ", ".join(BELEGE),
                 "  Reichweite: %s" % ", ".join(REICHWEITEN)]
     else:
-        gr = gruppen(z["kandidaten"], GRUPPE_ABGLEICH)[idx]
-        aus.append("Auftrag: Entscheide je Paar nach regeln.md, Z3: gleich (dieselbe Behauptung, Wiederholung), "
-                   "sachverhalt (verschiedene Behauptungen zum selben Sachverhalt) oder verschieden.")
-        aus += ["", "Eingabe:"]
-        for k, (i, j) in enumerate(gr, idx * GRUPPE_ABGLEICH + 1):
-            a, b = z["aussagen"][i], z["aussagen"][j]
-            aus.append("p%02d: %s (%s) %s  ⟷  %s (%s) %s" % (k, a["id"], a["fundstellen"], a["text"],
-                                                          b["id"], b["fundstellen"], b["text"]))
-        aus += ["", "Abgabe: eine Zeile je Paar in %s" % datei, "  <Paar> | gleich|sachverhalt|verschieden"]
+        k = z["kandidaten"][idx]
+        aus.append("Auftrag: Prüfe nach regeln.md, Z3, ob eine Aussage dieser Einheit dieselbe Behauptung ist wie eine "
+                   "frühere (gleich) oder eine andere Behauptung zum selben Sachverhalt (sachverhalt). Nur sichere Fälle; "
+                   "alles andere bleibt getrennt.")
+        aus += ["", "Aussagen dieser Einheit:"]
+        aus += ["%s | %s | %s" % (x["id"], x["fundstellen"], x["text"]) for x in z["aussagen"] if x["einheit"] == k]
+        aus += ["", "Frühere Aussagen:"]
+        aus += ["%s | %s" % (x["id"], x["text"]) for x in z["aussagen"] if x["einheit"] < k]
+        aus += ["", "Abgabe: eine Zeile je gefundenem Paar in %s" % datei,
+                "  <Kennung dieser Einheit> | <frühere Kennung> | gleich|sachverhalt",
+                "  nichts gefunden: eine Zeile keine"]
     aus += ["", "Dann: breakdown.py submit \"%s\"" % ordner]
     print("\n".join(aus))
 
@@ -912,7 +895,7 @@ def fundstellen_pruefen(z, e, fundstellen, nr):
             if not m or not e["von"] <= int(m.group(1)) <= e["bis"]:
                 raise FormatFehler("Zeile %d: Fundstelle %r liegt nicht in der Einheit (%s)" % (nr, f, e["bereich"]))
             aus.append("Z. %s" % m.group(1))
-    return ", ".join(aus)
+    return ", ".join(OrderedDict.fromkeys(aus))
 
 
 def abgabe_zerlegen(z, idx, text):
@@ -980,26 +963,35 @@ def abgabe_einstufen(z, idx, text):
 
 
 def abgabe_abgleichen(z, idx, text):
-    erwartet = ["p%02d" % k for k in range(idx * GRUPPE_ABGLEICH + 1,
-                                           idx * GRUPPE_ABGLEICH + len(gruppen(z["kandidaten"], GRUPPE_ABGLEICH)[idx]) + 1)]
-    gesehen = {}
-    for nr, l in enumerate(text.splitlines(), 1):
-        if not l.strip():
-            continue
+    k = z["kandidaten"][idx]
+    pos = {x["id"]: n for n, x in enumerate(z["aussagen"])}
+    neu = {x["id"] for x in z["aussagen"] if x["einheit"] == k}
+    alt = {x["id"] for x in z["aussagen"] if x["einheit"] < k}
+    zeilen = [(n, l) for n, l in enumerate(text.splitlines(), 1) if l.strip()]
+    if not zeilen:
+        raise FormatFehler("Abgabe ist leer; ohne Fund eine Zeile keine schreiben")
+    if len(zeilen) == 1 and zeilen[0][1].strip() == "keine":
+        return []
+    paare, gleich_schon = [], set()
+    for nr, l in zeilen:
         f = felder(l)
-        if len(f) != 2:
-            raise FormatFehler("Zeile %d: braucht 2 Felder (<Paar> | <Entscheidung>), hat %d" % (nr, len(f)))
-        if f[0] not in erwartet:
-            raise FormatFehler("Zeile %d: Paar %r gehört nicht zu dieser Gruppe" % (nr, f[0]))
-        if f[0] in gesehen:
-            raise FormatFehler("Zeile %d: Paar %s doppelt" % (nr, f[0]))
-        if f[1] not in ("gleich", "sachverhalt", "verschieden"):
-            raise FormatFehler("Zeile %d: Entscheidung %r; erwartet gleich, sachverhalt oder verschieden" % (nr, f[1]))
-        gesehen[f[0]] = f[1]
-    fehlend = [p for p in erwartet if p not in gesehen]
-    if fehlend:
-        raise FormatFehler("es fehlen Paare: %s" % ", ".join(fehlend))
-    return gesehen
+        if len(f) != 3:
+            raise FormatFehler("Zeile %d: braucht 3 Felder (<Kennung> | <frühere Kennung> | gleich|sachverhalt), hat %d" % (nr, len(f)))
+        n_, a_, wert = f
+        if n_ not in neu:
+            raise FormatFehler("Zeile %d: Kennung %r gehört nicht zu dieser Einheit" % (nr, n_))
+        if a_ not in alt:
+            raise FormatFehler("Zeile %d: frühere Kennung %r gehört zu keiner früheren Einheit" % (nr, a_))
+        if wert not in ("gleich", "sachverhalt"):
+            raise FormatFehler("Zeile %d: Entscheidung %r; erwartet gleich oder sachverhalt" % (nr, wert))
+        if [pos[a_], pos[n_], wert] in paare:
+            raise FormatFehler("Zeile %d: Paar doppelt" % nr)
+        if wert == "gleich":
+            if n_ in gleich_schon:
+                raise FormatFehler("Zeile %d: %s ist schon als gleich zugeordnet" % (nr, n_))
+            gleich_schon.add(n_)
+        paare.append([pos[a_], pos[n_], wert])
+    return paare
 
 
 def cmd_submit(args):
@@ -1036,13 +1028,11 @@ def cmd_submit(args):
             zeile = "Einstufen %d/%d: %d Aussagen eingestuft; zusammen %d von %d" % (
                 idx + 1, aufgaben(z, phase), len(werte), fertig, len(z["aussagen"]))
         else:
-            ent = abgabe_abgleichen(z, idx, text)
-            for p, wert in ent.items():
-                i, j = z["kandidaten"][int(p[1:]) - 1]
-                z["entscheidungen"].append([i, j, wert])
-            c = Counter(ent.values())
-            zeile = "Abgleichen %d/%d: %d gleich, %d Sachverhalt, %d verschieden" % (
-                idx + 1, aufgaben(z, phase), c["gleich"], c["sachverhalt"], c["verschieden"])
+            paare = abgabe_abgleichen(z, idx, text)
+            z["entscheidungen"] += paare
+            c = Counter(p[2] for p in paare)
+            zeile = "Abgleichen %d/%d (Einheit %d): %d gleich, %d Sachverhalt" % (
+                idx + 1, aufgaben(z, phase), z["kandidaten"][idx], c["gleich"], c["sachverhalt"])
     except FormatFehler as e:
         z["fehlversuche"][schluessel] = z["fehlversuche"].get(schluessel, 0) + 1
         z["zurueckgewiesen"] += 1

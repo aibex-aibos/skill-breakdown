@@ -12,7 +12,7 @@ description: >
 
 Der Skill zerlegt einen Beitrag in Einzelaussagen, stuft jede ein und speichert das Ergebnis als Markdown-Datei. Die Regeln und der Katalog stehen in **`regeln.md`** in diesem Ordner; lies sie bei jedem Aufruf vollständig, bevor du zerlegst. Gezählt wird nur mit dem Skript, nie geschätzt.
 
-**Das Skript führt.** Die Grundzerlegung ist keine einzelne große Aufgabe, sondern eine Folge kleiner Teilaufgaben, die das Skript ausgibt und prüft: eine Einheit zerlegen, eine Gruppe von Aussagen einstufen, eine Gruppe von Kandidaten abgleichen. Du erledigst immer **nur die Teilaufgabe, die `next` ausgibt**, schreibst ihr Ergebnis in die genannte Datei und gibst es mit `submit` ab. Zerleg nie im Denken vor, was noch nicht ausgegeben ist, und schreib nie den ganzen Beitrag auf einmal.
+**Das Skript führt.** Die Grundzerlegung ist keine einzelne große Aufgabe, sondern eine Folge kleiner Teilaufgaben, die das Skript ausgibt und prüft: eine Einheit zerlegen, eine Gruppe von Aussagen einstufen, die Aussagen einer Einheit mit den früheren abgleichen. Du erledigst immer **nur die Teilaufgabe, die `next` ausgibt**, schreibst ihr Ergebnis in die genannte Datei und gibst es mit `submit` ab. Zerleg nie im Denken vor, was noch nicht ausgegeben ist, und schreib nie den ganzen Beitrag auf einmal.
 
 **Skript:** `python3 <Skill-Ordner>/scripts/breakdown.py <befehl> …`; `<Skill-Ordner>` ist der Ordner dieses Skills („Base directory for this skill"). Immer über `python3` aufrufen. Exit-Code 2 heißt: das Format einer Datei oder Abgabe ist verletzt; die Ausgabe nennt Zeile und Grund. Exit-Code 3 heißt: eine Teilaufgabe wurde nach drei zurückgewiesenen Abgaben abgebrochen.
 
@@ -98,7 +98,7 @@ Die Zieldatei schreibt `breakdown.py assemble`: Kopf im Memo-Stil, kein Frontmat
 4. **Beginn melden:** Zieldatei, Fassung der Regeln, Art des Beitrags, Zahl der Einheiten. Keine Rückfrage (siehe *Grenze*).
 5. **Schleife,** bis `next` `fertig` ausgibt:
    1. `breakdown.py next "<arbeitsordner>"` und genau die ausgegebene Teilaufgabe lesen;
-   2. sie nach `regeln.md` erledigen: beim **Zerlegen** nur diese Einheit (Z1 bis Z11, nicht einstufen; Wiederholungen nur innerhalb der Einheit zusammenführen), beim **Einstufen** nur diese Aussagen nach dem Katalog, beim **Abgleichen** nur diese Paare nach Z3;
+   2. sie nach `regeln.md` erledigen: beim **Zerlegen** nur diese Einheit (Z1 bis Z11, nicht einstufen; Wiederholungen nur innerhalb der Einheit zusammenführen), beim **Einstufen** nur diese Aussagen nach dem Katalog, beim **Abgleichen** nur die Aussagen dieser Einheit gegen die früheren nach Z3, nur sichere Fälle;
    3. das Ergebnis im angegebenen Format in die genannte Abgabedatei schreiben, eine Zeile je Eintrag; ein senkrechter Strich im Text wird `\|`;
    4. `breakdown.py submit "<arbeitsordner>"` und dessen **Fortschrittszeile unverändert ausgeben**, etwa „Zerlegen 3/10: 9 Aussagen, 1 Rahmen; zusammen 27 Aussagen".
 
